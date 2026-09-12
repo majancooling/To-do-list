@@ -598,18 +598,71 @@
   <div>⚙</div>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  const SUPABASE_URL = "https://ycjpxtefvdsiwsfofwzw.supabase.co";
+  // =========================
+  // SUPABASE CONFIGURATION
+  // =========================
 
-  const SUPABASE_KEY = "sb_publishable_Ib0-yOUVBd1FAEWoRpaCGw_mmvHd-bd";
+  const SUPABASE_URL =
+    "https://ycjpxtefvdsiwsfofwzw.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_Ib0-yOUVBd1FAEWoRpaCGw_mmvHd-bd";
 
   const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
   );
 
-  console.log("Supabase connected!");
+
+  // =========================
+  // CHECK AUTHENTICATION
+  // =========================
+
+  async function checkUser() {
+
+    const {
+      data: { user },
+      error
+    } = await supabaseClient.auth.getUser();
+
+    if (error) {
+      console.error("Authentication error:", error);
+      return;
+    }
+
+    if (user) {
+      console.log("Logged in:", user.email);
+    } else {
+      console.log("No user logged in.");
+    }
+  }
+
+
+  // =========================
+  // AUTH STATE LISTENER
+  // =========================
+
+  supabaseClient.auth.onAuthStateChange(
+    (event, session) => {
+
+      if (session) {
+        console.log(
+          "User logged in:",
+          session.user.email
+        );
+      } else {
+        console.log("User logged out.");
+      }
+
+    }
+  );
+
+
+  // Start
+  checkUser();
 </script>
 </body>
 </html>
