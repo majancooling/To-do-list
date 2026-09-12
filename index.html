@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TaskFlow</title>
- 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 * {
   box-sizing: border-box;
@@ -12,447 +14,443 @@
   padding: 0;
 }
 
-:root {
-  --bg:#08090d;
-  --panel:#11131a;
-  --panel2:#171923;
-  --border:rgba(255,255,255,.09);
-  --text:#f5f7ff;
-  --muted:#969bad;
-  --accent:#7c5cff;
-  --green:#24d6a5;
-  --red:#ff5d73;
-}
-
 body {
-  min-height:100vh;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at 10% 10%,rgba(124,92,255,.2),transparent 30%),
-    radial-gradient(circle at 90% 80%,rgba(36,214,165,.12),transparent 30%),
-    var(--bg);
-  color:var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f7fb;
+  color: #172033;
+  min-height: 100vh;
 }
 
-button,input {
-  font:inherit;
+button,
+input,
+select {
+  font: inherit;
 }
 
 button {
-  cursor:pointer;
+  cursor: pointer;
+  border: 0;
 }
 
-.hidden {
-  display:none!important;
+.container {
+  width: min(100% - 28px, 900px);
+  margin: auto;
 }
 
 /* AUTH */
 
 .auth {
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 .auth-card {
-  width:100%;
-  max-width:430px;
-  padding:32px;
-  border:1px solid var(--border);
-  border-radius:24px;
-  background:rgba(17,19,26,.85);
-  backdrop-filter:blur(20px);
-  box-shadow:0 25px 80px rgba(0,0,0,.4);
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 15px 50px rgba(0,0,0,.08);
+  animation: pop .5s ease;
 }
 
 .logo {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:25px;
-  font-weight:800;
-  margin-bottom:10px;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
 
-.logo-icon {
-  width:42px;
-  height:42px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,#7c5cff,#b36cff);
+.subtitle {
+  color: #737b8c;
+  margin-bottom: 25px;
 }
 
-.auth-subtitle {
-  color:var(--muted);
-  margin-bottom:28px;
+input,
+select {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid #e1e5ec;
+  border-radius: 13px;
+  outline: none;
+  background: white;
 }
 
-.auth-card h2 {
-  margin-bottom:18px;
+input:focus,
+select:focus {
+  border-color: #6366f1;
 }
 
-.input {
-  width:100%;
-  padding:14px;
-  margin-bottom:12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:#0b0d12;
-  color:white;
-  outline:none;
-}
-
-.input:focus {
-  border-color:var(--accent);
+.field {
+  margin-bottom: 14px;
 }
 
 .primary {
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:12px;
-  color:white;
-  font-weight:700;
-  background:linear-gradient(135deg,#7c5cff,#9d62ff);
+  width: 100%;
+  padding: 14px;
+  border-radius: 13px;
+  background: #6366f1;
+  color: white;
+  font-weight: 700;
+  transition: .2s;
 }
 
-.switch {
-  margin-top:18px;
-  text-align:center;
-  color:var(--muted);
-  font-size:14px;
+.primary:hover {
+  transform: translateY(-2px);
 }
 
-.switch span {
-  color:#a995ff;
-  cursor:pointer;
-  font-weight:700;
+.secondary {
+  margin-top: 12px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 13px;
+  background: #eef0ff;
+  color: #5558c9;
+  font-weight: 700;
 }
 
 .message {
-  margin-bottom:14px;
-  padding:11px;
-  border-radius:10px;
-  background:rgba(255,93,115,.1);
-  color:#ff9aaa;
-  font-size:13px;
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
 }
 
 /* APP */
 
 .app {
-  min-height:100vh;
+  display: none;
+  padding: 22px 0 50px;
 }
 
-.topbar {
-  height:72px;
-  padding:0 28px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  border-bottom:1px solid var(--border);
-  background:rgba(8,9,13,.75);
-  backdrop-filter:blur(20px);
-  position:sticky;
-  top:0;
-  z-index:10;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.brand {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:800;
-  font-size:20px;
-}
-
-.brand-icon {
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,#7c5cff,#b36cff);
-}
-
-.user-area {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.user-email {
-  color:var(--muted);
-  font-size:13px;
+.header h1 {
+  font-size: 28px;
 }
 
 .logout {
-  padding:9px 13px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--panel);
-  color:white;
+  background: #fff;
+  border: 1px solid #e4e7ee;
+  padding: 9px 13px;
+  border-radius: 11px;
 }
 
-.layout {
-  display:grid;
-  grid-template-columns:240px 1fr;
-  min-height:calc(100vh - 72px);
+/* DASHBOARD */
+
+.dashboard {
+  background: white;
+  padding: 22px;
+  border-radius: 22px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.05);
+  margin-bottom: 18px;
+  animation: slideUp .5s ease;
 }
 
-/* SIDEBAR */
-
-.sidebar {
-  padding:22px 16px;
-  border-right:1px solid var(--border);
+.finished {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.sidebar-title {
-  color:var(--muted);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  margin:10px 10px;
+.finished strong {
+  font-size: 25px;
 }
 
-.list-button {
-  width:100%;
-  padding:12px;
-  margin-bottom:6px;
-  border:0;
-  border-radius:11px;
-  text-align:left;
-  background:transparent;
-  color:var(--muted);
+.progress-track {
+  height: 13px;
+  background: #edf0f5;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.list-button:hover,
-.list-button.active {
-  background:rgba(124,92,255,.15);
-  color:white;
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#6366f1,#8b5cf6);
+  border-radius: 20px;
+  transition: width .8s cubic-bezier(.2,.8,.2,1);
 }
 
-.new-list {
-  width:100%;
-  margin-top:10px;
-  padding:11px;
-  border:1px dashed #4c456c;
-  border-radius:11px;
-  background:transparent;
-  color:#a995ff;
+.percent {
+  text-align: right;
+  margin-top: 7px;
+  color: #777f91;
+  font-size: 13px;
 }
 
-/* CONTENT */
-
-.content {
-  padding:30px;
-  max-width:1100px;
-  width:100%;
+.targets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
 }
 
-.heading {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:25px;
-  gap:15px;
+.target {
+  background: #f8f9fc;
+  padding: 16px;
+  border-radius: 17px;
 }
 
-.heading h1 {
-  font-size:32px;
+.target-title {
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 
-.heading p {
-  color:var(--muted);
-  margin-top:5px;
+.target-number {
+  font-size: 22px;
+  font-weight: 800;
 }
 
-.add-task {
-  padding:12px 18px;
-  border:0;
-  border-radius:12px;
-  background:linear-gradient(135deg,#7c5cff,#9d62ff);
-  color:white;
-  font-weight:700;
+.target small {
+  color: #777f91;
 }
 
-/* STATS */
-
-.stats {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
-  margin-bottom:22px;
+.target .progress-track {
+  height: 8px;
+  margin-top: 10px;
 }
 
-.stat {
-  padding:18px;
-  border:1px solid var(--border);
-  border-radius:16px;
-  background:rgba(255,255,255,.04);
+/* CONTROLS */
+
+.controls {
+  background: white;
+  padding: 18px;
+  border-radius: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.04);
 }
 
-.stat small {
-  color:var(--muted);
+.add-row {
+  display: flex;
+  gap: 9px;
 }
 
-.stat strong {
-  display:block;
-  font-size:27px;
-  margin-top:5px;
+.add-row input {
+  flex: 1;
+}
+
+.add-btn {
+  padding: 0 18px;
+  border-radius: 13px;
+  background: #6366f1;
+  color: white;
+  font-weight: 700;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+/* CATEGORIES */
+
+.category-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 3px 0 12px;
+}
+
+.category-btn {
+  white-space: nowrap;
+  padding: 8px 13px;
+  border-radius: 20px;
+  background: #f0f1f6;
+  color: #555c6d;
+}
+
+.category-btn.active {
+  background: #6366f1;
+  color: white;
 }
 
 /* TASKS */
 
-.task-panel {
-  padding:22px;
-  border:1px solid var(--border);
-  border-radius:20px;
-  background:rgba(255,255,255,.04);
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .task {
-  display:flex;
-  align-items:center;
-  gap:13px;
-  padding:15px 5px;
-  border-bottom:1px solid rgba(255,255,255,.06);
+  background: white;
+  padding: 15px;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,.04);
+  animation: taskIn .35s ease;
+  transition: transform .2s, opacity .3s;
 }
 
-.task:last-child {
-  border-bottom:0;
+.task:hover {
+  transform: translateY(-2px);
 }
 
 .check {
-  width:21px;
-  height:21px;
-  border:2px solid #626779;
-  border-radius:6px;
-  flex-shrink:0;
-  cursor:pointer;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 2px solid #cbd0dc;
+  background: white;
+  flex-shrink: 0;
 }
 
-.task.completed .check {
-  background:var(--green);
-  border-color:var(--green);
+.task.done .check {
+  background: #6366f1;
+  border-color: #6366f1;
 }
 
-.task.completed .check::after {
-  content:"✓";
-  color:#06120e;
-  font-size:13px;
-  font-weight:900;
-  margin-left:3px;
+.task.done .check::after {
+  content: "✓";
+  color: white;
+  display: block;
+  text-align: center;
+  line-height: 21px;
+  font-size: 14px;
 }
 
 .task-title {
-  flex:1;
-  font-size:15px;
+  flex: 1;
+  font-weight: 600;
 }
 
-.task.completed .task-title {
-  text-decoration:line-through;
-  color:#717687;
+.task.done .task-title {
+  text-decoration: line-through;
+  color: #9ba1ad;
+}
+
+.category-tag {
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: #eee;
 }
 
 .delete {
-  border:0;
-  background:transparent;
-  color:#777b8c;
-  font-size:18px;
+  background: transparent;
+  color: #a0a5b0;
+  font-size: 19px;
 }
 
 .delete:hover {
-  color:var(--red);
+  color: #ef4444;
 }
 
 .empty {
-  text-align:center;
-  padding:50px 20px;
-  color:var(--muted);
+  text-align: center;
+  padding: 45px 20px;
+  color: #858c9b;
 }
 
-/* MOBILE */
+/* MODAL */
 
-@media(max-width:700px) {
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+}
 
-  .topbar {
-    padding:0 15px;
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  border-radius: 22px;
+  animation: pop .3s ease;
+}
+
+.modal-card h2 {
+  margin-bottom: 17px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.cancel {
+  background: #edf0f5;
+}
+
+.save {
+  background: #6366f1;
+  color: white;
+}
+
+/* ANIMATIONS */
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(.94);
   }
-
-  .user-email {
-    display:none;
-  }
-
-  .layout {
-    display:block;
-  }
-
-  .sidebar {
-    border-right:0;
-    border-bottom:1px solid var(--border);
-    padding:12px;
-    display:flex;
-    gap:6px;
-    overflow-x:auto;
-  }
-
-  .sidebar-title,
-  .new-list {
-    display:none;
-  }
-
-  .list-button {
-    min-width:max-content;
-    width:auto;
-    margin:0;
-  }
-
-  .content {
-    padding:20px 15px 40px;
-  }
-
-  .heading {
-    align-items:flex-start;
-  }
-
-  .heading h1 {
-    font-size:26px;
-  }
-
-  .stats {
-    grid-template-columns:repeat(3,1fr);
-  }
-
-  .stat {
-    padding:13px;
-  }
-
-  .stat strong {
-    font-size:21px;
-  }
-
-  .stat small {
-    font-size:11px;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@media(max-width:430px) {
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .heading {
-    display:block;
+@keyframes taskIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media(max-width:600px) {
+  .targets {
+    grid-template-columns: 1fr;
   }
 
-  .add-task {
-    width:100%;
-    margin-top:15px;
+  .add-row {
+    flex-direction: column;
   }
 
-  .stats {
-    gap:7px;
+  .add-btn {
+    padding: 13px;
+  }
+
+  .header h1 {
+    font-size: 24px;
   }
 }
 </style>
@@ -460,858 +458,905 @@ button {
 
 <body>
 
-<!-- LOGIN / SIGNUP -->
+<!-- LOGIN -->
 
-<section id="authScreen" class="auth">
-
+<section class="auth" id="auth">
   <div class="auth-card">
+    <div class="logo">TaskFlow ✨</div>
+    <p class="subtitle">Organize your day. Reach your goals.</p>
 
-    <div class="logo">
-      <div class="logo-icon">✓</div>
-      TaskFlow
+    <div class="field">
+      <input id="email" type="email" placeholder="Email">
     </div>
 
-    <p class="auth-subtitle">
-      Organize your tasks. Stay productive.
-    </p>
-
-    <div id="authMessage" class="message hidden"></div>
-
-    <div id="loginBox">
-
-      <h2>Welcome back</h2>
-
-      <input
-        id="loginEmail"
-        class="input"
-        type="email"
-        placeholder="Email"
-      >
-
-      <input
-        id="loginPassword"
-        class="input"
-        type="password"
-        placeholder="Password"
-      >
-
-      <button id="loginBtn" class="primary">
-        Log in
-      </button>
-
-      <div class="switch">
-        Don't have an account?
-        <span onclick="showSignup()">Create one</span>
-      </div>
-
+    <div class="field">
+      <input id="password" type="password" placeholder="Password">
     </div>
 
-    <div id="signupBox" class="hidden">
+    <button class="primary" onclick="login()">Login</button>
+    <button class="secondary" onclick="signup()">Create account</button>
 
-      <h2>Create account</h2>
-
-      <input
-        id="signupEmail"
-        class="input"
-        type="email"
-        placeholder="Email"
-      >
-
-      <input
-        id="signupPassword"
-        class="input"
-        type="password"
-        placeholder="Password"
-      >
-
-      <button id="signupBtn" class="primary">
-        Create account
-      </button>
-
-      <div class="switch">
-        Already have an account?
-        <span onclick="showLogin()">Log in</span>
-      </div>
-
-    </div>
-
+    <div class="message" id="authMessage"></div>
   </div>
-
 </section>
 
 
-<!-- MAIN APP -->
+<!-- APP -->
 
-<section id="appScreen" class="app hidden">
+<section class="app" id="app">
 
-  <header class="topbar">
+<div class="container">
 
-    <div class="brand">
-      <div class="brand-icon">✓</div>
-      TaskFlow
-    </div>
-
-    <div class="user-area">
-
-      <span id="userEmail" class="user-email"></span>
-
-      <button id="logoutBtn" class="logout">
-        Logout
-      </button>
-
-    </div>
-
+  <header class="header">
+    <h1>My Tasks ✨</h1>
+    <button class="logout" onclick="logout()">Logout</button>
   </header>
 
 
-  <div class="layout">
+  <!-- DASHBOARD -->
 
-    <aside class="sidebar">
+  <div class="dashboard">
 
-      <div class="sidebar-title">
-        My Lists
+    <div class="finished">
+      <div>
+        <small>Overall Progress</small>
+        <div>
+          <strong id="finishedText">0 / 0</strong>
+        </div>
       </div>
 
-      <div id="listsContainer"></div>
+      <strong id="overallPercent">0%</strong>
+    </div>
 
-      <button id="newListBtn" class="new-list">
-        ＋ New List
-      </button>
-
-    </aside>
+    <div class="progress-track">
+      <div class="progress-bar" id="overallBar"></div>
+    </div>
 
 
-    <main class="content">
+    <div class="targets">
 
-      <div class="heading">
+      <div class="target">
+        <div class="target-title">🎯 Daily Target</div>
 
         <div>
-          <h1 id="listTitle">My Tasks</h1>
-          <p>Stay organized and get things done.</p>
+          <span class="target-number" id="dailyProgress">0</span>
+          <span>/</span>
+          <span id="dailyTarget">5</span>
         </div>
 
-        <button id="addTaskBtn" class="add-task">
-          ＋ Add Task
-        </button>
+        <small>completed today</small>
 
+        <div class="progress-track">
+          <div class="progress-bar" id="dailyBar"></div>
+        </div>
       </div>
 
 
-      <div class="stats">
+      <div class="target">
+        <div class="target-title">📅 Weekly Target</div>
 
-        <div class="stat">
-          <small>Total</small>
-          <strong id="totalCount">0</strong>
+        <div>
+          <span class="target-number" id="weeklyProgress">0</span>
+          <span>/</span>
+          <span id="weeklyTarget">30</span>
         </div>
 
-        <div class="stat">
-          <small>Completed</small>
-          <strong id="completedCount">0</strong>
-        </div>
+        <small>completed this week</small>
 
-        <div class="stat">
-          <small>Remaining</small>
-          <strong id="remainingCount">0</strong>
+        <div class="progress-track">
+          <div class="progress-bar" id="weeklyBar"></div>
         </div>
-
       </div>
 
+    </div>
 
-      <div class="task-panel">
-
-        <div id="tasksContainer"></div>
-
-      </div>
-
-    </main>
+    <button
+      class="secondary"
+      style="margin-top:15px"
+      onclick="openTargetModal()">
+      ⚙️ Change Targets
+    </button>
 
   </div>
 
+
+  <!-- CONTROLS -->
+
+  <div class="controls">
+
+    <div class="add-row">
+      <input id="taskInput" placeholder="What do you need to do?">
+      <button class="add-btn" onclick="addTask()">Add</button>
+    </div>
+
+    <div class="options">
+
+      <select id="categorySelect">
+        <option value="">No category</option>
+      </select>
+
+      <button
+        class="secondary"
+        style="margin:0"
+        onclick="openCategoryModal()">
+        + Category
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- CATEGORY FILTER -->
+
+  <div class="category-row" id="categoryFilters">
+    <button class="category-btn active" onclick="filterCategory('all',this)">
+      All
+    </button>
+  </div>
+
+
+  <!-- TASKS -->
+
+  <div class="tasks" id="tasks"></div>
+
+</div>
 </section>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- TARGET MODAL -->
+
+<div class="modal" id="targetModal">
+  <div class="modal-card">
+
+    <h2>🎯 Set Targets</h2>
+
+    <div class="field">
+      <label>Daily target</label>
+      <input id="dailyInput" type="number" min="1">
+    </div>
+
+    <div class="field">
+      <label>Weekly target</label>
+      <input id="weeklyInput" type="number" min="1">
+    </div>
+
+    <div class="modal-buttons">
+      <button class="cancel" onclick="closeTargetModal()">Cancel</button>
+      <button class="save" onclick="saveTargets()">Save</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- CATEGORY MODAL -->
+
+<div class="modal" id="categoryModal">
+  <div class="modal-card">
+
+    <h2>🗂️ New Category</h2>
+
+    <div class="field">
+      <input id="categoryInput" placeholder="Category name">
+    </div>
+
+    <div class="field">
+      <label>Color</label>
+      <input id="categoryColor" type="color" value="#6366f1">
+    </div>
+
+    <div class="modal-buttons">
+      <button class="cancel" onclick="closeCategoryModal()">Cancel</button>
+      <button class="save" onclick="createCategory()">Create</button>
+    </div>
+
+  </div>
+</div>
+
 
 <script>
 
-/* ============================
+/* =========================
    SUPABASE
-============================ */
+========================= */
 
 const SUPABASE_URL =
-  "https://ycjpxtefvdsiwsfofwzw.supabase.co";
+"https://ycjpxtefvdsiwsfofwzw.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_Ib0-yOUVBd1FAEWoRpaCGw_mmvHd-bd";
+"sb_publishable_Ib0-yOUVBd1FAEWoRpaCGw_mmvHd-bd";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const client =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-
-/* ============================
-   VARIABLES
-============================ */
-
-let currentUser = null;
-let currentList = null;
-let lists = [];
+let user = null;
 let tasks = [];
+let categories = [];
+let currentFilter = "all";
+let targets = {
+  daily_target: 5,
+  weekly_target: 30
+};
 
 
-/* ============================
-   ELEMENTS
-============================ */
+/* =========================
+   AUTH
+========================= */
 
-const authScreen =
-  document.getElementById("authScreen");
+async function login() {
 
-const appScreen =
-  document.getElementById("appScreen");
+  const email =
+    document.getElementById("email").value.trim();
 
-const authMessage =
-  document.getElementById("authMessage");
+  const password =
+    document.getElementById("password").value;
 
+  const message =
+    document.getElementById("authMessage");
 
-/* ============================
-   AUTH UI
-============================ */
+  message.textContent = "Logging in...";
 
-function showMessage(message) {
-
-  authMessage.textContent = message;
-  authMessage.classList.remove("hidden");
-
-}
-
-function clearMessage() {
-
-  authMessage.classList.add("hidden");
-
-}
-
-function showSignup() {
-
-  clearMessage();
-
-  document
-    .getElementById("loginBox")
-    .classList.add("hidden");
-
-  document
-    .getElementById("signupBox")
-    .classList.remove("hidden");
-
-}
-
-function showLogin() {
-
-  clearMessage();
-
-  document
-    .getElementById("signupBox")
-    .classList.add("hidden");
-
-  document
-    .getElementById("loginBox")
-    .classList.remove("hidden");
-
-}
-
-
-/* ============================
-   SIGN UP
-============================ */
-
-document
-  .getElementById("signupBtn")
-  .addEventListener("click", async () => {
-
-    const email =
-      document.getElementById("signupEmail").value.trim();
-
-    const password =
-      document.getElementById("signupPassword").value;
-
-    if (!email || !password) {
-
-      showMessage("Enter an email and password.");
-
-      return;
-    }
-
-    if (password.length < 6) {
-
-      showMessage("Password must be at least 6 characters.");
-
-      return;
-    }
-
-    const {
-      data,
-      error
-    } = await supabaseClient.auth.signUp({
+  const { data, error } =
+    await client.auth.signInWithPassword({
       email,
       password
     });
 
-    if (error) {
-
-      showMessage(error.message);
-
-      return;
-    }
-
-    if (data.session) {
-
-      await startApp(data.session.user);
-
-    } else {
-
-      showMessage(
-        "Account created! Check your email to confirm your account, then log in."
-      );
-
-    }
-
-  });
-
-
-/* ============================
-   LOGIN
-============================ */
-
-document
-  .getElementById("loginBtn")
-  .addEventListener("click", async () => {
-
-    const email =
-      document.getElementById("loginEmail").value.trim();
-
-    const password =
-      document.getElementById("loginPassword").value;
-
-    if (!email || !password) {
-
-      showMessage("Enter your email and password.");
-
-      return;
-    }
-
-    const {
-      data,
-      error
-    } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-
-      showMessage(error.message);
-
-      return;
-    }
-
-    await startApp(data.user);
-
-  });
-
-
-/* ============================
-   LOGOUT
-============================ */
-
-document
-  .getElementById("logoutBtn")
-  .addEventListener("click", async () => {
-
-    await supabaseClient.auth.signOut();
-
-    currentUser = null;
-    currentList = null;
-
-    appScreen.classList.add("hidden");
-    authScreen.classList.remove("hidden");
-
-    showLogin();
-
-  });
-
-
-/* ============================
-   START APP
-============================ */
-
-async function startApp(user) {
-
-  currentUser = user;
-
-  authScreen.classList.add("hidden");
-  appScreen.classList.remove("hidden");
-
-  document.getElementById("userEmail").textContent =
-    user.email;
-
-  await loadLists();
-
-}
-
-
-/* ============================
-   LOAD LISTS
-============================ */
-
-async function loadLists() {
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("lists")
-    .select("*")
-    .eq("user_id", currentUser.id)
-    .order("created_at", {
-      ascending:true
-    });
-
-  if (error) {
-
-    alert(error.message);
-
+  if(error) {
+    message.textContent = error.message;
     return;
   }
 
-  lists = data || [];
+  user = data.user;
 
-  if (lists.length === 0) {
+  await startApp();
+}
 
-    const {
-      data:newList,
-      error:createError
-    } = await supabaseClient
-      .from("lists")
-      .insert({
-        user_id:currentUser.id,
-        name:"My Tasks"
-      })
-      .select()
-      .single();
 
-    if (createError) {
+async function signup() {
 
-      alert(createError.message);
+  const email =
+    document.getElementById("email").value.trim();
 
-      return;
-    }
+  const password =
+    document.getElementById("password").value;
 
-    lists = [newList];
+  const message =
+    document.getElementById("authMessage");
 
+  message.textContent = "Creating account...";
+
+  const { data, error } =
+    await client.auth.signUp({
+      email,
+      password
+    });
+
+  if(error) {
+    message.textContent = error.message;
+    return;
   }
 
-  currentList = currentList &&
-    lists.find(x => x.id === currentList.id)
-      ? lists.find(x => x.id === currentList.id)
-      : lists[0];
+  if(!data.session) {
+    message.textContent =
+      "Account created! Check your email to confirm your account.";
+    return;
+  }
 
-  renderLists();
+  user = data.user;
 
+  await startApp();
+}
+
+
+async function logout() {
+
+  await client.auth.signOut();
+
+  user = null;
+
+  document.getElementById("app").style.display = "none";
+  document.getElementById("auth").style.display = "flex";
+}
+
+
+/* =========================
+   START APP
+========================= */
+
+async function startApp() {
+
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  await loadCategories();
+  await loadTargets();
   await loadTasks();
 
 }
 
 
-/* ============================
-   RENDER LISTS
-============================ */
-
-function renderLists() {
-
-  const container =
-    document.getElementById("listsContainer");
-
-  container.innerHTML = "";
-
-  lists.forEach(list => {
-
-    const button =
-      document.createElement("button");
-
-    button.className =
-      "list-button " +
-      (currentList &&
-       currentList.id === list.id
-        ? "active"
-        : "");
-
-    button.textContent =
-      "📁 " + list.name;
-
-    button.onclick = async () => {
-
-      currentList = list;
-
-      renderLists();
-
-      await loadTasks();
-
-    };
-
-    container.appendChild(button);
-
-  });
-
-}
-
-
-/* ============================
-   CREATE LIST
-============================ */
-
-document
-  .getElementById("newListBtn")
-  .addEventListener("click", async () => {
-
-    const name =
-      prompt("Enter a name for your new list:");
-
-    if (!name || !name.trim()) return;
-
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("lists")
-      .insert({
-        user_id:currentUser.id,
-        name:name.trim()
-      })
-      .select()
-      .single();
-
-    if (error) {
-
-      alert(error.message);
-
-      return;
-    }
-
-    lists.push(data);
-
-    currentList = data;
-
-    renderLists();
-
-    await loadTasks();
-
-  });
-
-
-/* ============================
-   LOAD TASKS
-============================ */
+/* =========================
+   TASKS
+========================= */
 
 async function loadTasks() {
 
-  if (!currentList) return;
+  const { data, error } =
+    await client
+      .from("tasks")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
-  document.getElementById("listTitle")
-    .textContent = currentList.name;
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("tasks")
-    .select("*")
-    .eq("user_id", currentUser.id)
-    .eq("list_id", currentList.id)
-    .order("created_at", {
-      ascending:true
-    });
-
-  if (error) {
-
-    alert(error.message);
-
+  if(error) {
+    console.error(error);
     return;
   }
 
   tasks = data || [];
 
   renderTasks();
-
+  updateDashboard();
 }
 
 
-/* ============================
+async function addTask() {
+
+  const input =
+    document.getElementById("taskInput");
+
+  const title = input.value.trim();
+
+  if(!title) return;
+
+  const categoryId =
+    document.getElementById("categorySelect").value || null;
+
+  const { error } =
+    await client
+      .from("tasks")
+      .insert({
+        user_id: user.id,
+        title: title,
+        completed: false,
+        category_id: categoryId
+      });
+
+  if(error) {
+    alert(error.message);
+    return;
+  }
+
+  input.value = "";
+
+  await loadTasks();
+}
+
+
+async function toggleTask(id, completed) {
+
+  const { error } =
+    await client
+      .from("tasks")
+      .update({
+        completed: !completed
+      })
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+  if(error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadTasks();
+}
+
+
+async function deleteTask(id) {
+
+  const { error } =
+    await client
+      .from("tasks")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+  if(error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadTasks();
+}
+
+
+/* =========================
    RENDER TASKS
-============================ */
+========================= */
 
 function renderTasks() {
 
   const container =
-    document.getElementById("tasksContainer");
+    document.getElementById("tasks");
 
-  container.innerHTML = "";
+  let filtered = tasks;
 
-  if (tasks.length === 0) {
+  if(currentFilter !== "all") {
+
+    filtered =
+      tasks.filter(
+        t => t.category_id === currentFilter
+      );
+
+  }
+
+  if(filtered.length === 0) {
 
     container.innerHTML = `
       <div class="empty">
-        <div style="font-size:35px;margin-bottom:10px;">
-          ✨
+        <div style="font-size:40px">✨</div>
+        <p>No tasks here yet.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    filtered.map(task => {
+
+      const category =
+        categories.find(
+          c => c.id === task.category_id
+        );
+
+      return `
+        <div class="task ${task.completed ? "done" : ""}">
+
+          <button
+            class="check"
+            onclick="toggleTask('${task.id}', ${task.completed})">
+          </button>
+
+          <div class="task-title">
+            ${escapeHtml(task.title)}
+          </div>
+
+          ${
+            category
+            ?
+            `<span
+              class="category-tag"
+              style="background:${category.color}22;color:${category.color}">
+              ${escapeHtml(category.name)}
+            </span>`
+            : ""
+          }
+
+          <button
+            class="delete"
+            onclick="deleteTask('${task.id}')">
+            ×
+          </button>
+
         </div>
-        No tasks yet.<br>
-        Add your first task!
-      </div>
-    `;
+      `;
 
-  }
-
-  tasks.forEach(task => {
-
-    const row =
-      document.createElement("div");
-
-    row.className =
-      "task " +
-      (task.completed ? "completed" : "");
-
-    row.innerHTML = `
-      <div class="check"></div>
-
-      <div class="task-title">
-        ${escapeHTML(task.title)}
-      </div>
-
-      <button class="delete">
-        🗑️
-      </button>
-    `;
-
-    row
-      .querySelector(".check")
-      .onclick = () =>
-        toggleTask(task);
-
-    row
-      .querySelector(".delete")
-      .onclick = () =>
-        deleteTask(task);
-
-    container.appendChild(row);
-
-  });
-
-
-  updateStats();
-
+    }).join("");
 }
 
 
-/* ============================
-   ADD TASK
-============================ */
+/* =========================
+   DASHBOARD
+========================= */
 
-document
-  .getElementById("addTaskBtn")
-  .addEventListener("click", async () => {
-
-    if (!currentList) return;
-
-    const title =
-      prompt("What do you need to do?");
-
-    if (!title || !title.trim()) return;
-
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("tasks")
-      .insert({
-        user_id:currentUser.id,
-        list_id:currentList.id,
-        title:title.trim(),
-        completed:false
-      })
-      .select()
-      .single();
-
-    if (error) {
-
-      alert(error.message);
-
-      return;
-    }
-
-    tasks.push(data);
-
-    renderTasks();
-
-  });
-
-
-/* ============================
-   COMPLETE TASK
-============================ */
-
-async function toggleTask(task) {
-
-  const {
-    data,
-    error
-  } = await supabaseClient
-    .from("tasks")
-    .update({
-      completed:!task.completed
-    })
-    .eq("id",task.id)
-    .eq("user_id",currentUser.id)
-    .select()
-    .single();
-
-  if (error) {
-
-    alert(error.message);
-
-    return;
-  }
-
-  const index =
-    tasks.findIndex(x => x.id === task.id);
-
-  if (index !== -1) {
-
-    tasks[index] = data;
-
-  }
-
-  renderTasks();
-
-}
-
-
-/* ============================
-   DELETE TASK
-============================ */
-
-async function deleteTask(task) {
-
-  const confirmed =
-    confirm("Delete this task?");
-
-  if (!confirmed) return;
-
-  const {
-    error
-  } = await supabaseClient
-    .from("tasks")
-    .delete()
-    .eq("id",task.id)
-    .eq("user_id",currentUser.id);
-
-  if (error) {
-
-    alert(error.message);
-
-    return;
-  }
-
-  tasks =
-    tasks.filter(x => x.id !== task.id);
-
-  renderTasks();
-
-}
-
-
-/* ============================
-   STATISTICS
-============================ */
-
-function updateStats() {
+function updateDashboard() {
 
   const total = tasks.length;
 
   const completed =
-    tasks.filter(x => x.completed).length;
+    tasks.filter(t => t.completed).length;
 
-  const remaining =
-    total - completed;
+  const overall =
+    total === 0
+      ? 0
+      : Math.round((completed / total) * 100);
 
-  document.getElementById("totalCount")
-    .textContent = total;
+  document.getElementById("finishedText")
+    .textContent =
+    `${completed} / ${total}`;
 
-  document.getElementById("completedCount")
-    .textContent = completed;
+  document.getElementById("overallPercent")
+    .textContent =
+    `${overall}%`;
 
-  document.getElementById("remainingCount")
-    .textContent = remaining;
+  setTimeout(() => {
 
+    document.getElementById("overallBar")
+      .style.width = `${overall}%`;
+
+  }, 50);
+
+
+  /* DAILY */
+
+  const now = new Date();
+
+  const daily =
+    tasks.filter(task => {
+
+      if(!task.completed) return false;
+
+      const date =
+        new Date(task.created_at);
+
+      return date.toDateString() ===
+             now.toDateString();
+
+    }).length;
+
+
+  const dailyPercent =
+    Math.min(
+      100,
+      Math.round(
+        daily / targets.daily_target * 100
+      )
+    );
+
+
+  document.getElementById("dailyProgress")
+    .textContent = daily;
+
+  document.getElementById("dailyTarget")
+    .textContent = targets.daily_target;
+
+  document.getElementById("dailyBar")
+    .style.width =
+    `${dailyPercent}%`;
+
+
+  /* WEEKLY */
+
+  const start =
+    new Date(now);
+
+  const day =
+    start.getDay();
+
+  const difference =
+    day === 0 ? 6 : day - 1;
+
+  start.setDate(
+    start.getDate() - difference
+  );
+
+  start.setHours(0,0,0,0);
+
+
+  const weekly =
+    tasks.filter(task => {
+
+      if(!task.completed) return false;
+
+      return new Date(task.created_at) >= start;
+
+    }).length;
+
+
+  const weeklyPercent =
+    Math.min(
+      100,
+      Math.round(
+        weekly / targets.weekly_target * 100
+      )
+    );
+
+
+  document.getElementById("weeklyProgress")
+    .textContent = weekly;
+
+  document.getElementById("weeklyTarget")
+    .textContent = targets.weekly_target;
+
+  document.getElementById("weeklyBar")
+    .style.width =
+    `${weeklyPercent}%`;
 }
 
 
-/* ============================
-   SECURITY
-============================ */
+/* =========================
+   TARGETS
+========================= */
 
-function escapeHTML(value) {
+async function loadTargets() {
 
-  const div =
-    document.createElement("div");
+  const { data, error } =
+    await client
+      .from("targets")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  div.textContent = value;
-
-  return div.innerHTML;
-
-}
-
-
-/* ============================
-   CHECK EXISTING SESSION
-============================ */
-
-async function checkSession() {
-
-  const {
-    data
-  } = await supabaseClient.auth.getSession();
-
-  if (data.session) {
-
-    await startApp(data.session.user);
-
+  if(error) {
+    console.error(error);
+    return;
   }
 
-}
+  if(data) {
 
+    targets = data;
 
-/* ============================
-   AUTH STATE
-============================ */
+  } else {
 
-supabaseClient.auth.onAuthStateChange(
-  async (event, session) => {
+    const { data: newTarget } =
+      await client
+        .from("targets")
+        .insert({
+          user_id: user.id,
+          daily_target: 5,
+          weekly_target: 30
+        })
+        .select()
+        .single();
 
-    if (session && !currentUser) {
-
-      await startApp(session.user);
-
+    if(newTarget) {
+      targets = newTarget;
     }
 
   }
-);
+}
 
 
-/* START */
+function openTargetModal() {
+
+  document.getElementById("dailyInput").value =
+    targets.daily_target;
+
+  document.getElementById("weeklyInput").value =
+    targets.weekly_target;
+
+  document.getElementById("targetModal")
+    .style.display = "flex";
+}
+
+
+function closeTargetModal() {
+
+  document.getElementById("targetModal")
+    .style.display = "none";
+}
+
+
+async function saveTargets() {
+
+  const daily =
+    Number(
+      document.getElementById("dailyInput").value
+    );
+
+  const weekly =
+    Number(
+      document.getElementById("weeklyInput").value
+    );
+
+  if(daily < 1 || weekly < 1) return;
+
+  const { data, error } =
+    await client
+      .from("targets")
+      .update({
+        daily_target: daily,
+        weekly_target: weekly
+      })
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+  if(error) {
+
+    alert(error.message);
+    return;
+
+  }
+
+  targets = data;
+
+  closeTargetModal();
+
+  updateDashboard();
+}
+
+/* =========================
+   CATEGORIES
+========================= */
+
+async function loadCategories() {
+
+  const { data, error } =
+    await client
+      .from("categories")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  categories = data || [];
+
+  renderCategoryOptions();
+  renderCategoryFilters();
+}
+
+
+function renderCategoryOptions() {
+
+  const select =
+    document.getElementById("categorySelect");
+
+  select.innerHTML =
+    `<option value="">No category</option>`;
+
+  categories.forEach(category => {
+
+    select.innerHTML += `
+      <option value="${category.id}">
+        ${escapeHtml(category.name)}
+      </option>
+    `;
+
+  });
+}
+
+
+function renderCategoryFilters() {
+
+  const container =
+    document.getElementById("categoryFilters");
+
+  container.innerHTML = `
+    <button
+      class="category-btn ${currentFilter === "all" ? "active" : ""}"
+      onclick="filterCategory('all',this)">
+      All
+    </button>
+  `;
+
+  categories.forEach(category => {
+
+    container.innerHTML += `
+      <button
+        class="category-btn ${currentFilter === category.id ? "active" : ""}"
+        onclick="filterCategory('${category.id}',this)">
+        ${escapeHtml(category.name)}
+      </button>
+    `;
+
+  });
+}
+
+
+function filterCategory(id, button) {
+
+  currentFilter = id;
+
+  document.querySelectorAll(".category-btn")
+    .forEach(b => b.classList.remove("active"));
+
+  button.classList.add("active");
+
+  renderTasks();
+}
+
+
+function openCategoryModal() {
+
+  document.getElementById("categoryInput").value = "";
+
+  document.getElementById("categoryModal")
+    .style.display = "flex";
+}
+
+
+function closeCategoryModal() {
+
+  document.getElementById("categoryModal")
+    .style.display = "none";
+}
+
+
+async function createCategory() {
+
+  const name =
+    document.getElementById("categoryInput")
+      .value.trim();
+
+  const color =
+    document.getElementById("categoryColor").value;
+
+  if (!name) return;
+
+  const { error } =
+    await client
+      .from("categories")
+      .insert({
+        user_id: user.id,
+        name: name,
+        color: color
+      });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  closeCategoryModal();
+
+  await loadCategories();
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+function escapeHtml(text) {
+
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+/* =========================
+   ENTER KEY
+========================= */
+
+document
+  .getElementById("taskInput")
+  .addEventListener("keydown", e => {
+
+    if (e.key === "Enter") {
+      addTask();
+    }
+
+  });
+
+
+/* =========================
+   EXISTING SESSION
+========================= */
+
+async function checkSession() {
+
+  const { data } =
+    await client.auth.getSession();
+
+  if (data.session) {
+
+    user = data.session.user;
+
+    await startApp();
+
+  }
+
+}
 
 checkSession();
 
 </script>
 
 </body>
-  </html>
+</html>
