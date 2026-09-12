@@ -774,12 +774,52 @@ async function startApp() {
   document.getElementById("auth").style.display = "none";
   document.getElementById("app").style.display = "block";
 
+  await loadCurrentList();
   await loadCategories();
   await loadTargets();
+  async function loadCurrentList() {
+
+  const { data, error } =
+    await client
+      .from("lists")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data) {
+
+    currentListId = data.id;
+
+  } else {
+
+    const { data: newList, error: createError } =
+      await client
+        .from("lists")
+        .insert({
+          user_id: user.id,
+          name: "My Tasks"
+        })
+        .select()
+        .single();
+
+    if (createError) {
+      console.error(createError);
+      return;
+    }
+
+    currentListId = newList.id;
+  }
+  }
   await loadTasks();
 
 }
-
 
 /* =========================
    TASKS
@@ -820,13 +860,14 @@ async function addTask() {
 
   const { error } =
     await client
-      .from("tasks")
-      .insert({
+       .from("tasks")
+       .insert({
         user_id: user.id,
+        list_id: currentListId,
         title: title,
         completed: false,
         category_id: categoryId
-      });
+       });
 
   if(error) {
     alert(error.message);
