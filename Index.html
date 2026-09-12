@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — Organize Your Life</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #08090d;
+      --panel: rgba(255,255,255,0.055);
+      --border: rgba(255,255,255,0.09);
+      --text: #f5f7ff;
+      --muted: #9297a8;
+      --accent: #7c5cff;
+      --accent2: #24d6a5;
+      --danger: #ff5d73;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(124,92,255,.22), transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(36,214,165,.13), transparent 30%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 245px;
+      padding: 24px 16px;
+      border-right: 1px solid var(--border);
+      background: rgba(5,6,10,.72);
+      backdrop-filter: blur(20px);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px 30px;
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), #b36cff);
+      box-shadow: 0 8px 25px rgba(124,92,255,.35);
+    }
+
+    .nav-title {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 0 12px 9px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 5px;
+      border-radius: 12px;
+      color: var(--muted);
+      transition: .2s;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      color: white;
+      background: rgba(124,92,255,.15);
+    }
+
+    .nav-item.active {
+      box-shadow: inset 3px 0 var(--accent);
+    }
+
+    .profile {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 20px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg,#7c5cff,#24d6a5);
+      font-weight: 700;
+    }
+
+    .profile small {
+      color: var(--muted);
+    }
+
+    /* MAIN */
+
+    .main {
+      width: 100%;
+      margin-left: 245px;
+      padding: 34px;
+      max-width: 1450px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 15px;
+    }
+
+    .greeting h1 {
+      font-size: clamp(27px,4vw,38px);
+      letter-spacing: -1px;
+    }
+
+    .greeting p {
+      margin-top: 7px;
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      width: 43px;
+      height: 43px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: white;
+      font-size: 18px;
+    }
+
+    .add-btn {
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 18px;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg,var(--accent),#9d62ff);
+      box-shadow: 0 10px 25px rgba(124,92,255,.25);
+    }
+
+    /* STATS */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      padding: 20px;
+      border-radius: 18px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-value {
+      font-size: 29px;
+      font-weight: 800;
+      margin-top: 7px;
+    }
+
+    .stat-change {
+      margin-top: 7px;
+      font-size: 12px;
+      color: var(--accent2);
+    }
+
+    /* CONTENT */
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .panel-head h2 {
+      font-size: 17px;
+    }
+
+    .view-all {
+      color: #a995ff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* TASK */
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 14px 4px;
+      border-bottom: 1px solid rgba(255,255,255,.055);
+    }
+
+    .task:last-child {
+      border-bottom: 0;
+    }
+
+    .check {
+      width: 21px;
+      height: 21px;
+      border: 2px solid #626779;
+      border-radius: 7px;
+      flex-shrink: 0;
+    }
+
+    .task.done .check {
+      background: var(--accent2);
+      border-color: var(--accent2);
+      position: relative;
+    }
+
+    .task.done .check::after {
+      content: "✓";
+      position: absolute;
+      color: #06120e;
+      font-size: 13px;
+      font-weight: 900;
+      left: 3px;
+      top: -1px;
+    }
+
+    .task-info {
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .task.done .task-title {
+      text-decoration: line-through;
+      color: #707587;
+    }
+
+    .task-meta {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .priority {
+      font-size: 10px;
+      padding: 5px 8px;
+      border-radius: 20px;
+      background: rgba(255,93,115,.1);
+      color: #ff8191;
+    }
+
+    /* PROGRESS */
+
+    .progress-ring {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      margin: 12px auto 20px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle, #11131a 62%, transparent 63%),
+        conic-gradient(var(--accent2) 68%, #272a35 0);
+    }
+
+    .progress-number {
+      text-align: center;
+    }
+
+    .progress-number strong {
+      display: block;
+      font-size: 31px;
+    }
+
+    .progress-number span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* MOBILE */
+
+    .mobile-nav {
+      display: none;
+    }
+
+    @media(max-width:900px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 22px 16px 90px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2,1fr);
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-nav {
+        position: fixed;
+        display: flex;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        height: 62px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: rgba(10,11,17,.9);
+        backdrop-filter: blur(20px);
+        z-index: 20;
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .mobile-nav div {
+        color: var(--muted);
+        font-size: 20px;
+      }
+
+      .mobile-nav .active {
+        color: white;
+      }
+    }
+
+    @media(max-width:500px) {
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .add-btn {
+        padding: 10px 13px;
+        font-size: 12px;
+      }
+
+      .stats {
+        gap: 10px;
+      }
+
+      .stat {
+        padding: 15px;
+      }
+
+      .stat-value {
+        font-size: 23px;
+      }
+
+      .panel {
+        padding: 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <div class="logo-icon">✓</div>
+      TaskFlow
+    </div>
+
+    <div class="nav-title">Workspace</div>
+
+    <div class="nav-item active">🏠 Dashboard</div>
+    <div class="nav-item">✓ My Tasks</div>
+    <div class="nav-item">📁 My Lists</div>
+    <div class="nav-item">⭐ Important</div>
+
+    <div class="nav-title" style="margin-top:25px;">Tools</div>
+
+    <div class="nav-item">📊 Statistics</div>
+    <div class="nav-item">⚙ Settings</div>
+
+    <div class="profile">
+      <div class="avatar">U</div>
+      <div>
+        <strong>User</strong><br>
+        <small>Free account</small>
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <div class="greeting">
+        <h1>Good evening 👋</h1>
+        <p>Let's make today productive.</p>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn">🔔</button>
+        <button class="add-btn">＋ New Task</button>
+      </div>
+
+    </div>
+
+    <section class="stats">
+
+      <div class="stat">
+        <div class="stat-label">Total Tasks</div>
+        <div class="stat-value">24</div>
+        <div class="stat-change">↑ 12% this week</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value">16</div>
+        <div class="stat-change">↑ Great progress</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Remaining</div>
+        <div class="stat-value">8</div>
+        <div class="stat-change">Keep going</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Lists</div>
+        <div class="stat-value">5</div>
+        <div class="stat-change">Organized</div>
+      </div>
+
+    </section>
+
+    <section class="content">
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <h2>Today's Tasks</h2>
+          <span class="view-all">View all →</span>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-info">
+            <div class="task-title">Finish project website</div>
+            <div class="task-meta">Today · Work</div>
+          </div>
+          <span class="priority">High</span>
+        </div>
+
+        <div class="task done">
+          <div class="check"></div>
+          <div class="task-info">
+            <div class="task-title">Review today's notes</div>
+            <div class="task-meta">Today · Study</div>
+          </div>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-info">
+            <div class="task-title">Complete assignment</div>
+            <div class="task-meta">Today · Study</div>
+          </div>
+          <span class="priority">High</span>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-info">
+            <div class="task-title">Plan tomorrow</div>
+            <div class="task-meta">Tonight · Personal</div>
+          </div>
+        </div>
+
+        <div class="task done">
+          <div class="check"></div>
+          <div class="task-info">
+            <div class="task-title">Organize workspace</div>
+            <div class="task-meta">Today · Personal</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <h2>Weekly Progress</h2>
+          <span class="view-all">This week</span>
+        </div>
+
+        <div class="progress-ring">
+          <div class="progress-number">
+            <strong>68%</strong>
+            <span>completed</span>
+          </div>
+        </div>
+
+        <div class="progress-text">
+          You've completed <strong style="color:white;">16 of 24</strong> tasks.<br>
+          Keep up the momentum! 🚀
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<nav class="mobile-nav">
+  <div class="active">⌂</div>
+  <div>✓</div>
+  <div>＋</div>
+  <div>📁</div>
+  <div>⚙</div>
+</nav>
+
+</body>
+</html>
