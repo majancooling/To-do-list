@@ -577,7 +577,27 @@ select:focus {
     </button>
 
   </div>
+<div class="calendar-card">
+  <div class="calendar-header">
+    <button class="calendar-btn" onclick="changeMonth(-1)">‹</button>
 
+    <h2 id="calendarMonth">Month Year</h2>
+
+    <button class="calendar-btn" onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div class="calendar-weekdays">
+    <span>Sun</span>
+    <span>Mon</span>
+    <span>Tue</span>
+    <span>Wed</span>
+    <span>Thu</span>
+    <span>Fri</span>
+    <span>Sat</span>
+  </div>
+
+  <div id="calendarDays" class="calendar-days"></div>
+</div>
 
   <!-- CONTROLS -->
 
