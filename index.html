@@ -1081,28 +1081,36 @@ if (streakElement) {
 function getTodayStats() {
   const today = new Date();
 
-  const todayTasks = tasks.filter(task => {
-    if (!task.created_at) return false;
+  const isToday = (dateString) => {
+    if (!dateString) return false;
 
-    const date = new Date(task.created_at);
+    const date = new Date(dateString);
 
     return (
       date.getFullYear() === today.getFullYear() &&
       date.getMonth() === today.getMonth() &&
       date.getDate() === today.getDate()
     );
-  });
+  };
 
-  const completed = todayTasks.filter(task => task.completed).length;
-  const remaining = todayTasks.length - completed;
+  const completedToday = tasks.filter(task =>
+    task.completed &&
+    isToday(task.completed_at)
+  ).length;
+
+  const createdToday = tasks.filter(task =>
+    isToday(task.created_at)
+  );
+
+  const remaining = createdToday.filter(task =>
+    !task.completed
+  ).length;
 
   return {
-    total: todayTasks.length,
-    completed: completed,
+    completed: completedToday,
     remaining: remaining
   };
 }
-
     const todayStats = getTodayStats();
 
 const todayCompletedElement =
