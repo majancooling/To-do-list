@@ -1887,10 +1887,11 @@ function renderCalendar() {
   const year = calendarDate.getFullYear();
   const month = calendarDate.getMonth();
 
-  const monthName = calendarDate.toLocaleString(
-    "default",
-    { month: "long" }
-  );
+  const monthName =
+    calendarDate.toLocaleString(
+      "default",
+      { month: "long" }
+    );
 
   calendarMonth.textContent =
     `${monthName} ${year}`;
@@ -1903,69 +1904,114 @@ function renderCalendar() {
   const daysInMonth =
     new Date(year, month + 1, 0).getDate();
 
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
   for (let i = 0; i < firstDay; i++) {
+
     const emptyDay =
       document.createElement("div");
 
-    emptyDay.className = "calendar-day empty";
+    emptyDay.className =
+      "calendar-day empty";
 
     calendarDays.appendChild(emptyDay);
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (
+    let day = 1;
+    day <= daysInMonth;
+    day++
+  ) {
 
     const dayElement =
       document.createElement("div");
 
-    dayElement.className = "calendar-day";
+    dayElement.className =
+      "calendar-day";
 
     const dateKey =
       `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-    dayElement.textContent = day;
+    const dateObject =
+      new Date(dateKey + "T00:00:00");
 
-    /* Highlight today */
-    const today = new Date();
+    const dayTasks =
+      tasks.filter(task =>
+        task.due_date === dateKey
+      );
+
+    dayElement.innerHTML = `
+      <span class="calendar-number">
+        ${day}
+      </span>
+    `;
+
+    /* TODAY */
 
     if (
       day === today.getDate() &&
       month === today.getMonth() &&
       year === today.getFullYear()
     ) {
+
       dayElement.classList.add("today");
     }
 
-    /* Check whether this date has tasks */
-    const dayTasks = tasks.filter(task =>
-      task.due_date === dateKey
-    );
+    /* TASK STATUS */
 
     if (dayTasks.length > 0) {
-      dayElement.classList.add("has-tasks");
+
+      const unfinishedTasks =
+        dayTasks.filter(task =>
+          !task.completed
+        );
+
+      const overdueTasks =
+        dayTasks.filter(task =>
+          !task.completed &&
+          dateObject < today
+        );
 
       const indicator =
         document.createElement("span");
 
-      indicator.className = "task-dot";
+      indicator.className =
+        "task-dot";
+
+      if (overdueTasks.length > 0) {
+
+        indicator.classList.add(
+          "overdue-dot"
+        );
+
+      } else if (
+        unfinishedTasks.length === 0
+      ) {
+
+        indicator.classList.add(
+          "completed-dot"
+        );
+
+      } else {
+
+        indicator.classList.add(
+          "pending-dot"
+        );
+      }
 
       dayElement.appendChild(indicator);
     }
 
-    /* Click date */
+    /* CLICK DATE */
+
     dayElement.onclick = () => {
       selectCalendarDate(dateKey);
     };
 
     calendarDays.appendChild(dayElement);
   }
-}
-
-function changeMonth(amount) {
-  calendarDate.setMonth(
-    calendarDate.getMonth() + amount
-  );
-
-  renderCalendar();
 }
 
 function selectCalendarDate(dateKey) {
