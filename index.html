@@ -658,6 +658,27 @@ select:focus {
   width: 100%;
   margin-top: 15px;
 }
+
+.category-filter-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.category-delete-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 14px;
+  opacity: 0.55;
+  transition: 0.2s;
+}
+
+.category-delete-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
   
 </style>
 </head>
@@ -1619,6 +1640,34 @@ async function loadCategories() {
   renderCategoryFilters();
 }
 
+async function deleteCategory(categoryId) {
+
+  const category =
+    categories.find(c => c.id === categoryId);
+
+  if (!category) return;
+
+  const confirmed =
+    confirm(`Delete "${category.name}"?`);
+
+  if (!confirmed) return;
+
+  const { error } =
+    await client
+      .from("categories")
+      .delete()
+      .eq("id", categoryId)
+      .eq("user_id", user.id);
+
+  if (error) {
+    console.error(error);
+    alert("Could not delete category: " + error.message);
+    return;
+  }
+
+  await loadCategories();
+}
+
 
 function renderCategoryOptions() {
 
@@ -1656,11 +1705,22 @@ function renderCategoryFilters() {
   categories.forEach(category => {
 
     container.innerHTML += `
-      <button
-        class="category-btn ${currentFilter === category.id ? "active" : ""}"
-        onclick="filterCategory('${category.id}',this)">
-        ${escapeHtml(category.name)}
-      </button>
+      <div class="category-filter-item">
+
+        <button
+          class="category-btn ${currentFilter === category.id ? "active" : ""}"
+          onclick="filterCategory('${category.id}',this)">
+          ${escapeHtml(category.name)}
+        </button>
+
+        <button
+          class="category-delete-btn"
+          onclick="deleteCategory('${category.id}')"
+          title="Delete category">
+          🗑️
+        </button>
+
+      </div>
     `;
 
   });
