@@ -505,6 +505,17 @@ select:focus {
   </div>
     </div>
 
+    <div class="card today-card">
+  <div class="card-icon">📅</div>
+  <div>
+    <h3>Today</h3>
+    <p>
+      <span id="todayCompleted">0</span> completed ·
+      <span id="todayRemaining">0</span> remaining
+    </p>
+  </div>
+    </div>
+
     <div class="finished">
       <div>
         <small>Overall Progress</small>
@@ -1057,6 +1068,32 @@ if (streakElement) {
 
       completedDates.add(dateKey);
     }
+  
+function getTodayStats() {
+  const today = new Date();
+
+  const todayTasks = tasks.filter(task => {
+    if (!task.created_at) return false;
+
+    const date = new Date(task.created_at);
+
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
+  });
+
+  const completed = todayTasks.filter(task => task.completed).length;
+  const remaining = todayTasks.length - completed;
+
+  return {
+    total: todayTasks.length,
+    completed: completed,
+    remaining: remaining
+  };
+}
+    
   });
 
   let streak = 0;
