@@ -1752,6 +1752,40 @@ function changeMonth(amount) {
   renderCalendar();
 }
 
+function selectCalendarDate(dateKey) {
+
+  const selectedDate = new Date(dateKey + "T00:00:00");
+
+  const formattedDate =
+    selectedDate.toLocaleDateString("default", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+  const dayTasks = tasks.filter(task =>
+    task.due_date === dateKey
+  );
+
+  let message = `📅 ${formattedDate}\n\n`;
+
+  if (dayTasks.length === 0) {
+    message += "No tasks scheduled for this date.";
+  } else {
+
+    message += `Tasks (${dayTasks.length}):\n\n`;
+
+    dayTasks.forEach((task, index) => {
+
+      message +=
+        `${index + 1}. ${task.completed ? "✅" : "⬜"} ${task.title}\n`;
+    });
+  }
+
+  alert(message);
+}
+  
 </script>
 
 </body>
