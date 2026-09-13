@@ -1093,6 +1093,22 @@ function getTodayStats() {
     remaining: remaining
   };
 }
+
+    const todayStats = getTodayStats();
+
+const todayCompletedElement =
+  document.getElementById("todayCompleted");
+
+const todayRemainingElement =
+  document.getElementById("todayRemaining");
+
+if (todayCompletedElement) {
+  todayCompletedElement.textContent = todayStats.completed;
+}
+
+if (todayRemainingElement) {
+  todayRemainingElement.textContent = todayStats.remaining;
+}
     
   });
 
