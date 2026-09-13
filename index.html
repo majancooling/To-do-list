@@ -717,6 +717,7 @@ let currentListId = null;
 let tasks = [];
 let categories = [];
 let currentFilter = "all";
+let calendarDate = new Date();
 let targets = {
   daily_target: 5,
   weekly_target: 30
@@ -1546,6 +1547,78 @@ async function checkSession() {
 }
 
 checkSession();
+
+  /*=======================
+  calendar
+  =======================*/
+
+function renderCalendar() {
+  const calendarMonth =
+    document.getElementById("calendarMonth");
+
+  const calendarDays =
+    document.getElementById("calendarDays");
+
+  if (!calendarMonth || !calendarDays) return;
+
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+
+  const monthName = calendarDate.toLocaleString(
+    "default",
+    { month: "long" }
+  );
+
+  calendarMonth.textContent =
+    `${monthName} ${year}`;
+
+  calendarDays.innerHTML = "";
+
+  const firstDay =
+    new Date(year, month, 1).getDay();
+
+  const daysInMonth =
+    new Date(year, month + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const emptyDay =
+      document.createElement("div");
+
+    emptyDay.className = "calendar-day empty";
+
+    calendarDays.appendChild(emptyDay);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayElement =
+      document.createElement("div");
+
+    dayElement.className = "calendar-day";
+
+    dayElement.textContent = day;
+
+    const today = new Date();
+
+    if (
+      day === today.getDate() &&
+      month === today.getMonth() &&
+      year === today.getFullYear()
+    ) {
+      dayElement.classList.add("today");
+    }
+
+    calendarDays.appendChild(dayElement);
+  }
+}
+
+
+function changeMonth(amount) {
+  calendarDate.setMonth(
+    calendarDate.getMonth() + amount
+  );
+
+  renderCalendar();
+}
 
 </script>
 
