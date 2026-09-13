@@ -992,9 +992,9 @@ function renderTasks() {
         <div class="task ${task.completed ? "done" : ""}">
 
           <button
-            class="check"
-            onclick="toggleTask('${task.id}', ${task.completed})">
-          </button>
+  class="check"
+  onclick="toggleTask('${task.id}', ${!task.completed})">
+</button>
 
           <div class="task-title">
             ${escapeHtml(task.title)}
