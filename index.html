@@ -1027,6 +1027,45 @@ function updateDashboard() {
 
   }, 50);
 
+  function calculateStreak() {
+  if (!tasks.length) return 0;
+
+  const completedDates = new Set();
+
+  tasks.forEach(task => {
+    if (task.completed && task.completed_at) {
+      const date = new Date(task.completed_at);
+
+      const dateKey =
+        date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0");
+
+      completedDates.add(dateKey);
+    }
+  });
+
+  let streak = 0;
+  const today = new Date();
+
+  for (let i = 0; ; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+
+    const dateKey =
+      date.getFullYear() + "-" +
+      String(date.getMonth() + 1).padStart(2, "0") + "-" +
+      String(date.getDate()).padStart(2, "0");
+
+    if (completedDates.has(dateKey)) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+  }
 
   /* DAILY */
 
