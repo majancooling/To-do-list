@@ -496,6 +496,14 @@ select:focus {
   <!-- DASHBOARD -->
 
   <div class="dashboard">
+    
+    <div class="card streak-card">
+  <div class="card-icon">🔥</div>
+  <div>
+    <h3>Current Streak</h3>
+    <p><span id="streakCount">0</span> days</p>
+  </div>
+    </div>
 
     <div class="finished">
       <div>
@@ -1025,6 +1033,12 @@ function updateDashboard() {
     document.getElementById("overallBar")
       .style.width = `${overall}%`;
 
+    const streakElement = document.getElementById("streakCount");
+
+if (streakElement) {
+  streakElement.textContent = calculateStreak();
+}
+    
   }, 50);
 
   function calculateStreak() {
