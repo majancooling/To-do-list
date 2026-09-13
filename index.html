@@ -809,11 +809,23 @@ select:focus {
 
   <div class="controls">
 
-    <div class="add-row">
-      <input id="taskInput" placeholder="What do you need to do?">
-      <button class="add-btn" onclick="addTask()">Add</button>
-    </div>
+<div class="add-row">
+  <input
+    id="taskInput"
+    placeholder="What do you need to do?">
 
+  <input
+    id="taskDueDate"
+    type="date"
+    title="Finish by">
+
+  <button
+    class="add-btn"
+    onclick="addTask()">
+    Add
+  </button>
+</div>
+    
     <div class="options">
 
       <select id="categorySelect">
@@ -1102,32 +1114,43 @@ async function addTask() {
   const input =
     document.getElementById("taskInput");
 
-  const title = input.value.trim();
+  const dueDateInput =
+    document.getElementById("taskDueDate");
 
-  if(!title) return;
+  const title =
+    input.value.trim();
+
+  const dueDate =
+    dueDateInput.value || null;
+
+  if (!title) return;
 
   const categoryId =
     document.getElementById("categorySelect").value || null;
 
   const { error } =
     await client
-       .from("tasks")
-       .insert({
+      .from("tasks")
+      .insert({
         user_id: user.id,
         list_id: currentListId,
         title: title,
         completed: false,
-        category_id: categoryId
-       });
+        category_id: categoryId,
+        due_date: dueDate
+      });
 
-  if(error) {
+  if (error) {
     alert(error.message);
     return;
   }
 
   input.value = "";
+  dueDateInput.value = "";
 
   await loadTasks();
+
+  renderCalendar();
 }
 
 
