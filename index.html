@@ -1742,7 +1742,7 @@ function renderCalendar() {
 
     calendarDays.appendChild(dayElement);
   }
-      }
+}
 
 function changeMonth(amount) {
   calendarDate.setMonth(
@@ -1768,22 +1768,107 @@ function selectCalendarDate(dateKey) {
     task.due_date === dateKey
   );
 
-  let message = `📅 ${formattedDate}\n\n`;
+  let panel =
+    document.getElementById("calendarTaskPanel");
 
-  if (dayTasks.length === 0) {
-    message += "No tasks scheduled for this date.";
-  } else {
+  if (!panel) {
+    panel = document.createElement("div");
 
-    message += `Tasks (${dayTasks.length}):\n\n`;
+    panel.id = "calendarTaskPanel";
+    panel.className = "calendar-task-panel";
 
-    dayTasks.forEach((task, index) => {
-
-      message +=
-        `${index + 1}. ${task.completed ? "✅" : "⬜"} ${task.title}\n`;
-    });
+    document.body.appendChild(panel);
   }
 
-  alert(message);
+  panel.innerHTML = `
+    <div class="calendar-panel-content">
+
+      <button
+        class="calendar-panel-close"
+        onclick="closeCalendarPanel()">
+        ×
+      </button>
+
+      <div class="calendar-panel-icon">📅</div>
+
+      <h2>${formattedDate}</h2>
+
+      <p class="calendar-panel-subtitle">
+        ${
+          dayTasks.length === 0
+            ? "No tasks scheduled"
+            : `${dayTasks.length} task${dayTasks.length === 1 ? "" : "s"} scheduled`
+        }
+      </p>
+
+      <div class="calendar-panel-tasks">
+
+        ${
+          dayTasks.length === 0
+            ? `
+              <div class="empty-calendar-tasks">
+                <div>📝</div>
+                <p>No tasks for this date.</p>
+              </div>
+            `
+            : dayTasks.map(task => `
+              <div class="calendar-task-item">
+
+                <span class="calendar-task-status">
+                  ${task.completed ? "✅" : "⬜"}
+                </span>
+
+                <span class="${task.completed ? "completed-task" : ""}">
+                  ${task.title}
+                </span>
+
+              </div>
+            `).join("")
+        }
+
+      </div>
+
+      <button
+        class="primary calendar-add-btn"
+        onclick="prepareTaskForDate('${dateKey}')">
+        ＋ Add Task for This Date
+      </button>
+
+    </div>
+  `;
+
+  panel.classList.add("show");
+}
+
+
+function closeCalendarPanel() {
+
+  const panel =
+    document.getElementById("calendarTaskPanel");
+
+  if (panel) {
+    panel.classList.remove("show");
+  }
+}
+
+
+function prepareTaskForDate(dateKey) {
+
+  closeCalendarPanel();
+
+  const dateInput =
+    document.getElementById("taskDueDate");
+
+  if (dateInput) {
+    dateInput.value = dateKey;
+  }
+
+  const taskInput =
+    document.getElementById("taskInput");
+
+  if (taskInput) {
+    taskInput.focus();
+  }
 }
   
 </script>
