@@ -1697,13 +1697,18 @@ function renderCalendar() {
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
+
     const dayElement =
       document.createElement("div");
 
     dayElement.className = "calendar-day";
 
+    const dateKey =
+      `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
     dayElement.textContent = day;
 
+    /* Highlight today */
     const today = new Date();
 
     if (
@@ -1714,10 +1719,30 @@ function renderCalendar() {
       dayElement.classList.add("today");
     }
 
+    /* Check whether this date has tasks */
+    const dayTasks = tasks.filter(task =>
+      task.due_date === dateKey
+    );
+
+    if (dayTasks.length > 0) {
+      dayElement.classList.add("has-tasks");
+
+      const indicator =
+        document.createElement("span");
+
+      indicator.className = "task-dot";
+
+      dayElement.appendChild(indicator);
+    }
+
+    /* Click date */
+    dayElement.onclick = () => {
+      selectCalendarDate(dateKey);
+    };
+
     calendarDays.appendChild(dayElement);
   }
-}
-
+      }
 
 function changeMonth(amount) {
   calendarDate.setMonth(
